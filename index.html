@@ -1,0 +1,625 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Break Checker — Ferrell Collection</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link href="https://fonts.googleapis.com/css2?family=Barlow+Condensed:wght@400;600;700;800&family=Barlow:wght@400;500;600&family=DM+Mono:wght@400;500&display=swap" rel="stylesheet" />
+  <style>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+    :root {
+      --bg:         #0a0c10;
+      --surface:    #13161e;
+      --surface2:   #1a1e2a;
+      --border:     #222736;
+      --border2:    #2d3347;
+      --accent:     #f0c040;
+      --text:       #dde1ec;
+      --muted:      #606880;
+      --radius:     8px;
+    }
+
+    html { scroll-behavior: smooth; }
+
+    body {
+      background: var(--bg);
+      color: var(--text);
+      font-family: 'Barlow', sans-serif;
+      min-height: 100vh;
+      background-image:
+        radial-gradient(ellipse 80% 50% at 50% -10%, rgba(240,192,64,.06) 0%, transparent 70%);
+    }
+
+    /* ── HEADER ─────────────────────────────── */
+    header {
+      border-bottom: 1px solid var(--border);
+      background: rgba(10,12,16,.95);
+      backdrop-filter: blur(14px);
+      position: sticky;
+      top: 0;
+      z-index: 200;
+    }
+    .header-inner {
+      max-width: 1000px;
+      margin: 0 auto;
+      padding: 0 clamp(1rem,4vw,2rem);
+      height: 58px;
+      display: flex;
+      align-items: center;
+      gap: 1rem;
+    }
+    .logo {
+      font-family: 'Barlow Condensed', sans-serif;
+      font-weight: 800;
+      font-size: 1.45rem;
+      letter-spacing: .05em;
+      text-transform: uppercase;
+      color: var(--accent);
+      line-height: 1;
+    }
+    .logo span { color: var(--text); }
+    .pill {
+      background: var(--surface2);
+      border: 1px solid var(--border2);
+      color: var(--muted);
+      font-family: 'DM Mono', monospace;
+      font-size: .62rem;
+      letter-spacing: .1em;
+      text-transform: uppercase;
+      padding: .2rem .55rem;
+      border-radius: 99px;
+    }
+
+    /* ── HERO ───────────────────────────────── */
+    .hero {
+      max-width: 1000px;
+      margin: 0 auto;
+      padding: 2.8rem clamp(1rem,4vw,2rem) 0;
+    }
+    .hero-eyebrow {
+      font-family: 'DM Mono', monospace;
+      font-size: .7rem;
+      letter-spacing: .14em;
+      text-transform: uppercase;
+      color: var(--accent);
+      margin-bottom: .6rem;
+    }
+    .hero h1 {
+      font-family: 'Barlow Condensed', sans-serif;
+      font-weight: 800;
+      font-size: clamp(2.4rem, 7vw, 4.2rem);
+      letter-spacing: .02em;
+      text-transform: uppercase;
+      line-height: .95;
+      margin-bottom: .9rem;
+    }
+    .hero h1 em {
+      font-style: normal;
+      color: var(--accent);
+    }
+    .hero-sub {
+      color: var(--muted);
+      font-size: .95rem;
+      max-width: 480px;
+      line-height: 1.6;
+      margin-bottom: 2.4rem;
+    }
+
+    /* ── SEARCH PANEL ───────────────────────── */
+    .panel {
+      max-width: 1000px;
+      margin: 0 auto;
+      padding: 0 clamp(1rem,4vw,2rem);
+    }
+
+    .search-box {
+      background: var(--surface);
+      border: 1px solid var(--border2);
+      border-radius: var(--radius);
+      padding: 1.6rem;
+      margin-bottom: 2rem;
+      position: relative;
+    }
+    .search-box::before {
+      content: '';
+      position: absolute;
+      inset: 0;
+      border-radius: var(--radius);
+      background: linear-gradient(135deg, rgba(240,192,64,.04) 0%, transparent 60%);
+      pointer-events: none;
+    }
+
+    .fields {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 1rem 1.2rem;
+      margin-bottom: 1.2rem;
+    }
+    @media (max-width: 540px) { .fields { grid-template-columns: 1fr; } }
+
+    .field { display: flex; flex-direction: column; gap: .35rem; }
+
+    label {
+      font-family: 'DM Mono', monospace;
+      font-size: .67rem;
+      letter-spacing: .1em;
+      text-transform: uppercase;
+      color: var(--muted);
+    }
+
+    select {
+      background: var(--bg);
+      border: 1px solid var(--border2);
+      color: var(--text);
+      font-family: 'Barlow', sans-serif;
+      font-size: .95rem;
+      padding: .62rem .85rem;
+      border-radius: 6px;
+      outline: none;
+      cursor: pointer;
+      transition: border-color .15s;
+      -webkit-appearance: none;
+      background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='8' viewBox='0 0 12 8'%3E%3Cpath d='M1 1l5 5 5-5' stroke='%23606880' stroke-width='1.5' fill='none' stroke-linecap='round'/%3E%3C/svg%3E");
+      background-repeat: no-repeat;
+      background-position: right .75rem center;
+      padding-right: 2.2rem;
+    }
+    select:focus { border-color: var(--accent); }
+    select option { background: #1a1e2a; }
+
+    .search-actions {
+      display: flex;
+      gap: .7rem;
+      justify-content: flex-end;
+    }
+
+    .btn {
+      font-family: 'Barlow Condensed', sans-serif;
+      font-weight: 700;
+      font-size: 1rem;
+      letter-spacing: .1em;
+      text-transform: uppercase;
+      border: none;
+      border-radius: 6px;
+      padding: .65rem 1.8rem;
+      cursor: pointer;
+      transition: opacity .15s, transform .1s;
+    }
+    .btn:active { transform: scale(.97); }
+    .btn-primary { background: var(--accent); color: #0a0c10; }
+    .btn-primary:hover { opacity: .88; }
+    .btn-primary:disabled { opacity: .35; cursor: not-allowed; }
+    .btn-ghost {
+      background: var(--surface2);
+      color: var(--muted);
+      border: 1px solid var(--border2);
+    }
+    .btn-ghost:hover { color: var(--text); }
+
+    /* ── STATUS ─────────────────────────────── */
+    #status {
+      text-align: center;
+      color: var(--muted);
+      font-size: .9rem;
+      padding: 2.5rem 0;
+      display: none;
+    }
+    #status.on { display: block; }
+    .spinner {
+      display: inline-block;
+      width: 16px; height: 16px;
+      border: 2px solid var(--border2);
+      border-top-color: var(--accent);
+      border-radius: 50%;
+      animation: spin .65s linear infinite;
+      vertical-align: middle;
+      margin-right: .5rem;
+    }
+    @keyframes spin { to { transform: rotate(360deg); } }
+
+    /* ── RESULTS ────────────────────────────── */
+    #results { display: none; padding-bottom: 4rem; }
+    #results.on { display: block; }
+
+    .results-meta {
+      display: flex;
+      align-items: baseline;
+      gap: 1rem;
+      flex-wrap: wrap;
+      margin-bottom: 1.6rem;
+      padding-bottom: 1rem;
+      border-bottom: 1px solid var(--border);
+    }
+    .results-team {
+      font-family: 'Barlow Condensed', sans-serif;
+      font-weight: 800;
+      font-size: 2rem;
+      letter-spacing: .04em;
+      text-transform: uppercase;
+      line-height: 1;
+    }
+    .results-set {
+      font-family: 'DM Mono', monospace;
+      font-size: .72rem;
+      color: var(--muted);
+      letter-spacing: .06em;
+    }
+    .results-total {
+      margin-left: auto;
+      font-family: 'Barlow Condensed', sans-serif;
+      font-weight: 700;
+      font-size: 1.1rem;
+      letter-spacing: .06em;
+      color: var(--accent);
+    }
+
+    /* section block */
+    .section-block {
+      margin-bottom: 1rem;
+      border: 1px solid var(--border);
+      border-radius: var(--radius);
+      overflow: hidden;
+    }
+
+    .section-head {
+      display: flex;
+      align-items: center;
+      gap: .75rem;
+      padding: .7rem 1rem;
+      background: var(--surface);
+      cursor: pointer;
+      user-select: none;
+      border-bottom: 1px solid var(--border);
+      transition: background .12s;
+    }
+    .section-head:hover { background: var(--surface2); }
+
+    .s-stripe {
+      width: 3px;
+      height: 1.1rem;
+      border-radius: 2px;
+      flex-shrink: 0;
+    }
+    .s-name {
+      font-family: 'Barlow Condensed', sans-serif;
+      font-weight: 700;
+      font-size: 1rem;
+      letter-spacing: .06em;
+      text-transform: uppercase;
+      flex: 1;
+    }
+    .s-count {
+      font-family: 'DM Mono', monospace;
+      font-size: .68rem;
+      color: var(--muted);
+      background: var(--surface2);
+      padding: .15rem .5rem;
+      border-radius: 99px;
+      border: 1px solid var(--border);
+    }
+    .s-chevron {
+      color: var(--muted);
+      font-size: .7rem;
+      transition: transform .2s;
+    }
+    .section-block.collapsed .s-chevron { transform: rotate(-90deg); }
+    .section-block.collapsed .s-body { display: none; }
+
+    .s-body { background: var(--bg); }
+
+    .card-row {
+      display: grid;
+      grid-template-columns: 4rem 1fr auto;
+      align-items: center;
+      gap: .5rem 1rem;
+      padding: .5rem 1rem;
+      border-bottom: 1px solid rgba(255,255,255,.035);
+      font-size: .9rem;
+      transition: background .1s;
+    }
+    .card-row:last-child { border-bottom: none; }
+    .card-row:hover { background: rgba(255,255,255,.02); }
+
+    .c-num {
+      font-family: 'DM Mono', monospace;
+      font-size: .74rem;
+      color: var(--muted);
+      text-align: right;
+    }
+    .c-player { font-weight: 500; }
+    .c-spec {
+      font-family: 'DM Mono', monospace;
+      font-size: .6rem;
+      letter-spacing: .04em;
+      text-transform: uppercase;
+      padding: .18rem .5rem;
+      border-radius: 4px;
+      white-space: nowrap;
+    }
+
+    /* empty */
+    .empty {
+      text-align: center;
+      padding: 4rem 1rem;
+      color: var(--muted);
+    }
+    .empty-icon { font-size: 3rem; margin-bottom: 1rem; }
+    .empty-title {
+      font-family: 'Barlow Condensed', sans-serif;
+      font-weight: 800;
+      font-size: 1.8rem;
+      letter-spacing: .04em;
+      text-transform: uppercase;
+      color: var(--text);
+      margin-bottom: .5rem;
+    }
+
+    footer {
+      text-align: center;
+      color: var(--muted);
+      font-family: 'DM Mono', monospace;
+      font-size: .68rem;
+      letter-spacing: .06em;
+      padding: 2rem;
+      border-top: 1px solid var(--border);
+    }
+  </style>
+</head>
+<body>
+
+<header>
+  <div class="header-inner">
+    <div class="logo">Ferrell <span>Collection</span></div>
+    <div class="pill">Break Checker</div>
+  </div>
+</header>
+
+<div class="hero">
+  <div class="hero-eyebrow">Card Break Tool</div>
+  <h1>What's In<br/>Your <em>Slot?</em></h1>
+  <p class="hero-sub">Pick a set and your team — see every card across every section that belongs to your break slot.</p>
+</div>
+
+<div class="panel">
+
+  <div class="search-box">
+    <div class="fields">
+      <div class="field">
+        <label for="setSelect">Set</label>
+        <select id="setSelect">
+          <option value="">Loading sets…</option>
+        </select>
+      </div>
+      <div class="field">
+        <label for="teamSelect">Team</label>
+        <select id="teamSelect">
+          <option value="">— Choose a team —</option>
+          <option>Arizona Diamondbacks</option>
+          <option>Atlanta Braves</option>
+          <option>Baltimore Orioles</option>
+          <option>Boston Red Sox</option>
+          <option>Chicago Cubs</option>
+          <option>Chicago White Sox</option>
+          <option>Cincinnati Reds</option>
+          <option>Cleveland Guardians</option>
+          <option>Colorado Rockies</option>
+          <option>Detroit Tigers</option>
+          <option>Houston Astros</option>
+          <option>Kansas City Royals</option>
+          <option>Los Angeles Angels</option>
+          <option>Los Angeles Dodgers</option>
+          <option>Miami Marlins</option>
+          <option>Milwaukee Brewers</option>
+          <option>Minnesota Twins</option>
+          <option>New York Mets</option>
+          <option>New York Yankees</option>
+          <option>Oakland Athletics</option>
+          <option>Philadelphia Phillies</option>
+          <option>Pittsburgh Pirates</option>
+          <option>San Diego Padres</option>
+          <option>San Francisco Giants</option>
+          <option>Seattle Mariners</option>
+          <option>St. Louis Cardinals</option>
+          <option>Tampa Bay Rays</option>
+          <option>Texas Rangers</option>
+          <option>Toronto Blue Jays</option>
+          <option>Washington Nationals</option>
+        </select>
+      </div>
+    </div>
+    <div class="search-actions">
+      <button class="btn btn-ghost" onclick="clearResults()">Clear</button>
+      <button class="btn btn-primary" id="searchBtn" onclick="doSearch()">Find My Cards</button>
+    </div>
+  </div>
+
+  <div id="status"></div>
+  <div id="results"></div>
+
+</div>
+
+<footer>Ferrell Collection · Break Checker · Read-only · Powered by Supabase</footer>
+
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<script>
+const SUPABASE_URL = 'https://rgodsnhfzydtgmsbxwue.supabase.co';
+const SUPABASE_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InJnb2RzbmhmenlkdGdtc2J4d3VlIiwicm9sZSI6ImFub24iLCJpYXQiOjE3Nzg3ODg0NDMsImV4cCI6MjA5NDM2NDQ0M30.JvXzx28vNc1Qrhvu6Sxqg9vaqnMJgU9SJBEzzD3EY_Q';
+const db = supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
+
+function sectionColor(section) {
+  const s = (section || '').toLowerCase();
+  if (s === 'base' || s === 'base set')
+    return { stripe: '#22c55e', badge: 'rgba(34,197,94,.15)',   text: '#22c55e' };
+  if (s.includes('autograph') || s.includes('auto'))
+    return { stripe: '#a78bfa', badge: 'rgba(167,139,250,.15)', text: '#a78bfa' };
+  if (s.includes('relic') || s.includes('patch') || s.includes('memorabilia'))
+    return { stripe: '#fb923c', badge: 'rgba(251,146,60,.15)',  text: '#fb923c' };
+  if (s.includes('rookie') || s.includes('future stars'))
+    return { stripe: '#f87171', badge: 'rgba(248,113,113,.15)', text: '#f87171' };
+  if (s.includes('vintage') || s.includes('buyback'))
+    return { stripe: '#fde68a', badge: 'rgba(253,230,138,.15)', text: '#ca9a04' };
+  if (s.includes('variation') || s.includes('short print') || s.includes('sp '))
+    return { stripe: '#f472b6', badge: 'rgba(244,114,182,.15)', text: '#f472b6' };
+  if (s.includes('insert') || s.includes('chrome') || s.includes('foil') || s.includes('refractor'))
+    return { stripe: '#38bdf8', badge: 'rgba(56,189,248,.15)',  text: '#38bdf8' };
+  return { stripe: '#4b5563', badge: 'rgba(75,85,99,.15)', text: '#9ca3af' };
+}
+
+async function loadSets() {
+  const { data, error } = await db
+    .from('sets')
+    .select('id, year, brand, set_name, series')
+    .order('year', { ascending: false });
+
+  const sel = document.getElementById('setSelect');
+  if (error || !data?.length) {
+    sel.innerHTML = '<option value="">Could not load sets</option>';
+    return;
+  }
+  sel.innerHTML = '<option value="">— Choose a set —</option>' +
+    data.map(s => {
+      const label = [s.year, s.brand, s.set_name, s.series].filter(Boolean).join(' ');
+      return `<option value="${s.id}">${label}</option>`;
+    }).join('');
+}
+
+async function doSearch() {
+  const setId = document.getElementById('setSelect').value;
+  const team  = document.getElementById('teamSelect').value;
+
+  if (!setId) { flash('Please choose a set.'); return; }
+  if (!team)  { flash('Please choose a team.'); return; }
+
+  document.getElementById('searchBtn').disabled = true;
+  showStatus('<span class="spinner"></span> Fetching cards…');
+  document.getElementById('results').classList.remove('on');
+
+  let all = [], from = 0;
+  const PAGE = 1000;
+  while (true) {
+    const { data, error } = await db
+      .from('cards')
+      .select('card_number, player, team, specialty, section')
+      .eq('set_id', setId)
+      .ilike('team', `%${team}%`)
+      .order('section')
+      .order('card_number')
+      .range(from, from + PAGE - 1);
+
+    if (error) {
+      showStatus('Error: ' + error.message);
+      document.getElementById('searchBtn').disabled = false;
+      return;
+    }
+    all = all.concat(data || []);
+    if (!data || data.length < PAGE) break;
+    from += PAGE;
+  }
+
+  document.getElementById('searchBtn').disabled = false;
+  hideStatus();
+  renderResults(all, team);
+}
+
+function renderResults(cards, team) {
+  const el = document.getElementById('results');
+
+  if (!cards.length) {
+    el.innerHTML = `
+      <div class="empty">
+        <div class="empty-icon">⚾</div>
+        <div class="empty-title">No Cards Found</div>
+        <p>No cards for <strong>${escH(team)}</strong> in the selected set.</p>
+      </div>`;
+    el.classList.add('on');
+    return;
+  }
+
+  const groups = new Map();
+  for (const c of cards) {
+    const s = c.section || 'Uncategorized';
+    if (!groups.has(s)) groups.set(s, []);
+    groups.get(s).push(c);
+  }
+
+  const setLabel = document.getElementById('setSelect').selectedOptions[0]?.text || '';
+
+  let html = `
+    <div class="results-meta">
+      <div class="results-team">${escH(team)}</div>
+      <div class="results-set">${escH(setLabel)}</div>
+      <div class="results-total">${cards.length} card${cards.length !== 1 ? 's' : ''}</div>
+    </div>`;
+
+  let i = 0;
+  for (const [section, rows] of groups) {
+    const col = sectionColor(section);
+    const gid = 'sg' + i++;
+    html += `
+      <div class="section-block" id="${gid}">
+        <div class="section-head" onclick="toggleSection('${gid}')">
+          <span class="s-stripe" style="background:${col.stripe}"></span>
+          <span class="s-name">${escH(section)}</span>
+          <span class="s-count">${rows.length}</span>
+          <span class="s-chevron">▼</span>
+        </div>
+        <div class="s-body">`;
+
+    for (const c of rows) {
+      const spec = c.specialty
+        ? `<span class="c-spec" style="background:${col.badge};color:${col.text}">${escH(c.specialty)}</span>`
+        : '<span></span>';
+      html += `
+          <div class="card-row">
+            <span class="c-num">#${escH(c.card_number || '—')}</span>
+            <span class="c-player">${escH(c.player || '—')}</span>
+            ${spec}
+          </div>`;
+    }
+
+    html += `</div></div>`;
+  }
+
+  el.innerHTML = html;
+  el.classList.add('on');
+}
+
+function toggleSection(id) {
+  document.getElementById(id)?.classList.toggle('collapsed');
+}
+
+function escH(s) {
+  return String(s ?? '').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');
+}
+function showStatus(msg) {
+  const el = document.getElementById('status');
+  el.innerHTML = msg;
+  el.classList.add('on');
+}
+function hideStatus() {
+  document.getElementById('status').classList.remove('on');
+}
+function clearResults() {
+  hideStatus();
+  const el = document.getElementById('results');
+  el.innerHTML = '';
+  el.classList.remove('on');
+  document.getElementById('teamSelect').value = '';
+  document.getElementById('setSelect').value = '';
+}
+function flash(msg) {
+  showStatus(msg);
+  setTimeout(hideStatus, 2500);
+}
+
+document.addEventListener('DOMContentLoaded', () => {
+  loadSets();
+  document.addEventListener('keydown', e => {
+    if (e.key === 'Enter') doSearch();
+  });
+});
+</script>
+</body>
+</html>
