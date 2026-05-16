@@ -15,7 +15,7 @@
       --surface2:   #1a1e2a;
       --border:     #222736;
       --border2:    #2d3347;
-      --accent:     #f0c040;
+      --accent:     #1e88e5;
       --text:       #dde1ec;
       --muted:      #606880;
       --radius:     8px;
@@ -29,7 +29,7 @@
       font-family: 'Barlow', sans-serif;
       min-height: 100vh;
       background-image:
-        radial-gradient(ellipse 80% 50% at 50% -10%, rgba(240,192,64,.06) 0%, transparent 70%);
+        radial-gradient(ellipse 80% 50% at 50% -10%, rgba(30,136,229,.06) 0%, transparent 70%);
     }
 
     /* ── HEADER ─────────────────────────────── */
@@ -59,7 +59,6 @@
       color: #1e88e5;
       line-height: 1;
     }
-    .logo span { color: var(--text); }
     .pill {
       background: var(--surface2);
       border: 1px solid var(--border2);
@@ -127,7 +126,7 @@
       position: absolute;
       inset: 0;
       border-radius: var(--radius);
-      background: linear-gradient(135deg, rgba(240,192,64,.04) 0%, transparent 60%);
+      background: linear-gradient(135deg, rgba(30,136,229,.04) 0%, transparent 60%);
       pointer-events: none;
     }
 
@@ -170,6 +169,7 @@
     select:focus { border-color: var(--accent); }
     select:disabled { opacity: .4; cursor: not-allowed; }
     select option { background: #1a1e2a; }
+    select option:disabled { color: var(--muted); }
 
     .search-actions {
       display: flex;
@@ -190,7 +190,7 @@
       transition: opacity .15s, transform .1s;
     }
     .btn:active { transform: scale(.97); }
-    .btn-primary { background: var(--accent); color: #0a0c10; }
+    .btn-primary { background: var(--accent); color: #fff; }
     .btn-primary:hover { opacity: .88; }
     .btn-primary:disabled { opacity: .35; cursor: not-allowed; }
     .btn-ghost {
@@ -398,45 +398,43 @@
         <label for="teamSelect">Team</label>
         <select id="teamSelect" disabled>
           <option value="">— Choose a team —</option>
-          <option>Arizona Diamondbacks</option>
-          <option>Atlanta Braves</option>
-          <option>Baltimore Orioles</option>
-          <option>Boston Red Sox</option>
-          <option>Chicago Cubs</option>
-          <option>Chicago White Sox</option>
-          <option>Cincinnati Reds</option>
-          <option>Cleveland Guardians</option>
-          <option>Colorado Rockies</option>
-          <option>Detroit Tigers</option>
-          <option>Houston Astros</option>
-          <option>Kansas City Royals</option>
-          <option>Los Angeles Angels</option>
-          <option>Los Angeles Dodgers</option>
-          <option>Miami Marlins</option>
-          <option>Milwaukee Brewers</option>
-          <option>Minnesota Twins</option>
-          <option>New York Mets</option>
-          <option>New York Yankees</option>
-          <option>Oakland Athletics</option>
-          <option>Philadelphia Phillies</option>
-          <option>Pittsburgh Pirates</option>
-          <option>San Diego Padres</option>
-          <option>San Francisco Giants</option>
-          <option>Seattle Mariners</option>
-          <option>St. Louis Cardinals</option>
-          <option>Tampa Bay Rays</option>
-          <option>Texas Rangers</option>
-          <option>Toronto Blue Jays</option>
-          <option>Washington Nationals</option>
-          <option disabled>──────────────</option>
-          <option>Brooklyn Dodgers</option>
-          <option>California Angels</option>
-          <option>Florida Marlins</option>
-          <option>Japan</option>
-          <option>Montréal Expos</option
-          <option>USA</option>
-          <option>Yomiuri Giants</option>
-        </select>
+          <optgroup label="MLB Teams">
+            <option>Arizona Diamondbacks</option>
+            <option>Atlanta Braves</option>
+            <option>Baltimore Orioles</option>
+            <option>Boston Red Sox</option>
+            <option>Chicago Cubs</option>
+            <option>Chicago White Sox</option>
+            <option>Cincinnati Reds</option>
+            <option>Cleveland Guardians</option>
+            <option>Colorado Rockies</option>
+            <option>Detroit Tigers</option>
+            <option>Houston Astros</option>
+            <option>Kansas City Royals</option>
+            <option>Los Angeles Angels</option>
+            <option>Los Angeles Dodgers</option>
+            <option>Miami Marlins</option>
+            <option>Milwaukee Brewers</option>
+            <option>Minnesota Twins</option>
+            <option>New York Mets</option>
+            <option>New York Yankees</option>
+            <option>Athletics</option>
+            <option>Philadelphia Phillies</option>
+            <option>Pittsburgh Pirates</option>
+            <option>San Diego Padres</option>
+            <option>San Francisco Giants</option>
+            <option>Seattle Mariners</option>
+            <option>St. Louis Cardinals</option>
+            <option>Tampa Bay Rays</option>
+            <option>Texas Rangers</option>
+            <option>Toronto Blue Jays</option>
+            <option>Washington Nationals</option>
+          </optgroup>
+          <optgroup label="International / Other">
+            <option>Japan</option>
+            <option>USA</option>
+            <option>Yomiuri Giants</option>
+          </optgroup>
         </select>
       </div>
       <div class="field">
@@ -465,16 +463,31 @@ const SUPABASE_URL = 'https://rgodsnhfzydtgmsbxwue.supabase.co';
 const SUPABASE_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InJnb2RzbmhmenlkdGdtc2J4d3VlIiwicm9sZSI6ImFub24iLCJpYXQiOjE3Nzg3ODg0NDMsImV4cCI6MjA5NDM2NDQ0M30.JvXzx28vNc1Qrhvu6Sxqg9vaqnMJgU9SJBEzzD3EY_Q';
 const db = supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
 
+// ── FRANCHISE MAPPING ─────────────────────────────────────
+// Maps historical/alternate team names to their current franchise.
+// When a team is selected, ALL names in its list are searched.
+const FRANCHISE_MAP = {
+  'Los Angeles Dodgers':  ['Los Angeles Dodgers', 'Brooklyn Dodgers'],
+  'Miami Marlins':        ['Miami Marlins', 'Florida Marlins'],
+  'Los Angeles Angels':   ['Los Angeles Angels', 'California Angels', 'Anaheim Angels'],
+  'Washington Nationals': ['Washington Nationals', 'Montreal Expos', 'Montréal Expos'],
+};
+
+// Returns array of team name variants to search for a given selection
+function getTeamVariants(team) {
+  return FRANCHISE_MAP[team] || [team];
+}
+
 // ── SECTION COLOR ────────────────────────────────────────
 function sectionColor(section) {
   const s = (section || '').toLowerCase();
-  if (s === 'base' || s === 'base set')
+  if (s === 'base' || s === 'base set' || s === 'base cards')
     return { stripe: '#22c55e', badge: 'rgba(34,197,94,.15)',   text: '#22c55e' };
   if (s.includes('autograph') || s.includes('auto'))
     return { stripe: '#a78bfa', badge: 'rgba(167,139,250,.15)', text: '#a78bfa' };
   if (s.includes('relic') || s.includes('patch') || s.includes('memorabilia'))
     return { stripe: '#fb923c', badge: 'rgba(251,146,60,.15)',  text: '#fb923c' };
-  if (s.includes('rookie') || s.includes('future stars'))
+  if (s.includes('rookie') || s.includes('future stars') || s.includes('prospect'))
     return { stripe: '#f87171', badge: 'rgba(248,113,113,.15)', text: '#f87171' };
   if (s.includes('vintage') || s.includes('buyback'))
     return { stripe: '#fde68a', badge: 'rgba(253,230,138,.15)', text: '#ca9a04' };
@@ -502,8 +515,6 @@ async function loadSets() {
       const label = [s.year, s.brand, s.set_name, s.series].filter(Boolean).join(' ');
       return `<option value="${s.id}">${label}</option>`;
     }).join('');
-
-  sel.addEventListener('change', onSetChange);
 }
 
 // ── SET CHANGED ───────────────────────────────────────────
@@ -511,8 +522,6 @@ function onSetChange() {
   const setId = document.getElementById('setSelect').value;
   const teamSel = document.getElementById('teamSelect');
   const playerSel = document.getElementById('playerSelect');
-
-  // Reset downstream
   teamSel.value = '';
   teamSel.disabled = !setId;
   playerSel.innerHTML = '<option value="">— Choose a team first —</option>';
@@ -523,8 +532,8 @@ function onSetChange() {
 
 // ── TEAM CHANGED ──────────────────────────────────────────
 async function onTeamChange() {
-  const setId = document.getElementById('setSelect').value;
-  const team  = document.getElementById('teamSelect').value;
+  const setId  = document.getElementById('setSelect').value;
+  const team   = document.getElementById('teamSelect').value;
   const playerSel = document.getElementById('playerSelect');
 
   playerSel.innerHTML = '<option value="">Loading players…</option>';
@@ -537,24 +546,27 @@ async function onTeamChange() {
     return;
   }
 
-  // Fetch all distinct players for this team in this set
-  let allPlayers = [], from = 0;
-  const PAGE = 1000;
-  while (true) {
-    const { data, error } = await db
-      .from('cards')
-      .select('player')
-      .eq('set_id', setId)
-      .ilike('team', `%${team}%`)
-      .range(from, from + PAGE - 1);
+  const variants = getTeamVariants(team);
 
-    if (error || !data) break;
-    allPlayers = allPlayers.concat(data.map(r => r.player).filter(Boolean));
-    if (data.length < PAGE) break;
-    from += PAGE;
+  // Fetch all players for all franchise variants
+  let allPlayers = [];
+  for (const variant of variants) {
+    let from = 0;
+    const PAGE = 1000;
+    while (true) {
+      const { data, error } = await db
+        .from('cards')
+        .select('player')
+        .eq('set_id', setId)
+        .ilike('team', `%${variant}%`)
+        .range(from, from + PAGE - 1);
+      if (error || !data) break;
+      allPlayers = allPlayers.concat(data.map(r => r.player).filter(Boolean));
+      if (data.length < PAGE) break;
+      from += PAGE;
+    }
   }
 
-  // Deduplicate and sort
   const unique = [...new Set(allPlayers)].sort((a, b) => a.localeCompare(b));
 
   if (!unique.length) {
@@ -582,31 +594,43 @@ async function doSearch() {
   showStatus('<span class="spinner"></span> Fetching cards…');
   clearResults();
 
-  let all = [], from = 0;
-  const PAGE = 1000;
-  while (true) {
-    let q = db
-      .from('cards')
-      .select('card_number, player, team, specialty, section')
-      .eq('set_id', setId)
-      .ilike('team', `%${team}%`)
-      .order('section')
-      .order('card_number')
-      .range(from, from + PAGE - 1);
+  const variants = getTeamVariants(team);
+  let all = [];
 
-    // Filter by player if one is selected
-    if (player) q = q.ilike('player', player);
+  // Fetch cards for each franchise variant and combine
+  for (const variant of variants) {
+    let from = 0;
+    const PAGE = 1000;
+    while (true) {
+      let q = db
+        .from('cards')
+        .select('card_number, player, team, specialty, section')
+        .eq('set_id', setId)
+        .ilike('team', `%${variant}%`)
+        .order('section')
+        .order('card_number')
+        .range(from, from + PAGE - 1);
 
-    const { data, error } = await q;
-    if (error) {
-      showStatus('Error: ' + error.message);
-      document.getElementById('searchBtn').disabled = false;
-      return;
+      if (player) q = q.ilike('player', player);
+
+      const { data, error } = await q;
+      if (error) {
+        showStatus('Error: ' + error.message);
+        document.getElementById('searchBtn').disabled = false;
+        return;
+      }
+      all = all.concat(data || []);
+      if (!data || data.length < PAGE) break;
+      from += PAGE;
     }
-    all = all.concat(data || []);
-    if (!data || data.length < PAGE) break;
-    from += PAGE;
   }
+
+  // Re-sort combined results by section then card number
+  all.sort((a, b) => {
+    const secCmp = (a.section || '').localeCompare(b.section || '');
+    if (secCmp !== 0) return secCmp;
+    return (a.card_number || '').localeCompare(b.card_number || '', undefined, { numeric: true });
+  });
 
   document.getElementById('searchBtn').disabled = false;
   hideStatus();
@@ -718,6 +742,7 @@ function flash(msg) {
 // ── INIT ──────────────────────────────────────────────────
 document.addEventListener('DOMContentLoaded', () => {
   loadSets();
+  document.getElementById('setSelect').addEventListener('change', onSetChange);
   document.getElementById('teamSelect').addEventListener('change', onTeamChange);
 });
 </script>
