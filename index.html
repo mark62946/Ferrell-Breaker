@@ -331,6 +331,12 @@
       text-align: right;
     }
     .c-player { font-weight: 500; }
+    .c-team {
+      margin-left: .6rem;
+      font-size: .78rem;
+      font-weight: 400;
+      color: var(--muted);
+    }
     .c-spec {
       font-family: 'DM Mono', monospace;
       font-size: .6rem;
@@ -573,7 +579,7 @@ async function doFullChecklist() {
   document.getElementById('checklistBtn').disabled = false;
   document.getElementById('searchBtn').disabled = document.getElementById('playerSelect').disabled;
   hideStatus();
-  renderResults(all, 'Full Checklist', true);
+  renderResults(all, 'Full Checklist', true, true);
 }
 
 // ── TEAM CHANGED ──────────────────────────────────────────
@@ -686,7 +692,7 @@ async function doSearch() {
 }
 
 // ── RENDER ───────────────────────────────────────────────
-function renderResults(cards, label, collapsed = false) {
+function renderResults(cards, label, collapsed = false, showTeam = false) {
   const el = document.getElementById('results');
 
   if (!cards.length) {
@@ -737,7 +743,7 @@ function renderResults(cards, label, collapsed = false) {
       html += `
           <div class="card-row">
             <span class="c-num">#${escH(c.card_number || '—')}</span>
-            <span class="c-player">${escH(c.player || '—')}</span>
+            <span class="c-player">${escH(c.player || '—')}${showTeam && c.team ? `<span class="c-team">${escH(c.team)}</span>` : ''}</span>
             ${spec}
           </div>`;
     }
