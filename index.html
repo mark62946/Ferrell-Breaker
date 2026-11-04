@@ -199,6 +199,9 @@
       border: 1px solid var(--border2);
     }
     .btn-ghost:hover { color: var(--text); }
+    #checklistBtn:not(:disabled) { color: var(--text); border-color: var(--accent); }
+    #checklistBtn:not(:disabled):hover { border-color: var(--text); }
+    #checklistBtn:disabled { opacity: .4; cursor: not-allowed; }
 
     /* ── STATUS ─────────────────────────────── */
     #status {
