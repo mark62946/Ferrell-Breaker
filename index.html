@@ -573,7 +573,7 @@ async function doFullChecklist() {
   document.getElementById('checklistBtn').disabled = false;
   document.getElementById('searchBtn').disabled = document.getElementById('playerSelect').disabled;
   hideStatus();
-  renderResults(all, 'Full Checklist');
+  renderResults(all, 'Full Checklist', true);
 }
 
 // ── TEAM CHANGED ──────────────────────────────────────────
@@ -686,7 +686,7 @@ async function doSearch() {
 }
 
 // ── RENDER ───────────────────────────────────────────────
-function renderResults(cards, label) {
+function renderResults(cards, label, collapsed = false) {
   const el = document.getElementById('results');
 
   if (!cards.length) {
@@ -721,7 +721,7 @@ function renderResults(cards, label) {
     const col = sectionColor(section);
     const gid = 'sg' + i++;
     html += `
-      <div class="section-block" id="${gid}">
+      <div class="section-block${collapsed ? ' collapsed' : ''}" id="${gid}">
         <div class="section-head" onclick="toggleSection('${gid}')">
           <span class="s-stripe" style="background:${col.stripe}"></span>
           <span class="s-name">${escH(section)}</span>
